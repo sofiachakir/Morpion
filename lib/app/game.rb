@@ -13,6 +13,7 @@ class Game
 
   def play_turn
     # Vérifie à qui est le tour
+    puts "-" * 50
     if @player_1.turn
       puts "#{@player_1.name} c'est ton tour !"
     else
@@ -21,7 +22,6 @@ class Game
   end
 
   def show_help
-    puts 'Choisis une case !'
     puts '-----------------'
     puts '| A1 | A2 | A3 |'
     puts '-----------------'
@@ -33,7 +33,9 @@ class Game
 
   def menu
     # Affiche les cases disponibles
+    puts "-" * 50
     puts "Tapes 'H' si tu veux voir à quoi correspondent les noms des cases"
+    puts 'Sinon, choisis une case !'
     i = 0
     @available_board_cases_hash.each do |key, value|
       puts "#{i}. #{key}"
@@ -61,6 +63,7 @@ class Game
        @board.cases_hash[@available_board_cases_hash.keys[user_choice.to_i]].ring
     end
     @available_board_cases_hash.delete(@available_board_cases_hash.keys[user_choice.to_i])
+    puts "-" * 50
     @board.show_board
   end
 
@@ -80,6 +83,7 @@ class Game
   end
 
   def my_game_end
+    puts "-" * 50
     if winner == nil
       puts 'Partie nulle'
     elsif winner == 'X'.colorize(:blue)
@@ -87,6 +91,7 @@ class Game
     else
       puts "#{@player_2.name} a gagné !"
     end
+    puts "-" * 50
   end
 
   def winner
