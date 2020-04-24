@@ -10,14 +10,30 @@ class Board
     }
   end
 
-  def show_board
-    puts "-" * 13
-    puts "| #{@cases_hash[:a1].value} | #{@cases_hash[:a2].value} | #{@cases_hash[:a3].value} |"
-    puts "-" * 13
-    puts "| #{@cases_hash[:b1].value} | #{@cases_hash[:b2].value} | #{@cases_hash[:b3].value} |"
-    puts "-" * 13
-    puts "| #{@cases_hash[:c1].value} | #{@cases_hash[:c2].value} | #{@cases_hash[:c3].value} |"
-    puts "-" * 13
+  def update_board(case_to_update, case_value)
+    @cases_hash[case_to_update].value = case_value
+  end
+
+  def winner
+    # Définir les combinaisons gagnantes
+    [
+      [:a1,:a2,:a3],[:b1,:b2,:b3],[:c1,:c2,:c3],  # lignes
+      [:a1,:b1,:c1],[:a2,:b2,:c2],[:a3,:b3,:c3],  # colonnes
+      [:c1,:b2,:a3],[:a1,:b2,:c3]           # diagonal
+    ].each do |pattern| # pattern = combinaison gagnante
+      players = pattern.map{|i| @cases_hash[i].value }.uniq # uniq (pour supprimer les doublons)
+      if players.size != 1 # si taille = 1, c'étaient des doublons, et c'est gagné !
+        next
+      else
+        winner = players.first
+        if winner == ' '
+          next
+        else
+          return winner
+        end
+      end
+    end
+    nil
   end
 
 end

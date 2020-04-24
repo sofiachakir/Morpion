@@ -1,14 +1,15 @@
 
 class Game
-  attr_accessor :player_1, :player_2, :board, :available_board_cases_hash
+  attr_accessor :player_1, :player_2, :board, :available_board_cases_hash, :round
 
   def initialize(player_1_name, player_2_name)
     @player_1 = Player.new(player_1_name)
     @player_2 = Player.new(player_2_name)
+    @player_2.symbol = 'O'.colorize(:red)
     @board = Board.new
-    puts "que le jeu commence ! #{@player_1.name} tu commences !"
     @player_1.turn = true
     @available_board_cases_hash = @board.cases_hash.clone
+    @round = 1
   end
 
   def play_turn
@@ -45,26 +46,22 @@ class Game
   end
 
   def menu_choice(user_choice)
-    if user_choice.match(/[0-9]/) && user_choice.to_i >= 0 && user_choice.to_i < @available_board_cases_hash.size
-      update_board(user_choice)
+    if user_choice.match(/^[0-9]$/) && user_choice.to_i >= 0 && user_choice.to_i < @available_board_cases_hash.size
+      case_to_update = @available_board_cases_hash.keys[user_choice.to_i]
+      @player_1.turn ? case_value = @player_1.symbol : case_value = @player_2.symbol
+      @board.update_board(case_to_update, case_value)
+      @available_board_cases_hash.delete(case_to_update)
     elsif user_choice == 'H'
       show_help
       change_turns
+      puts "Appuie sur une touche pour continuer"
+      gets.chomp
     else
       puts "ERREUR !!!!! Choisis un des chiffres proposés s'il te plait."
       change_turns
+      puts "Appuie sur une touche pour continuer"
+      gets.chomp
     end
-  end
-
-  def update_board(user_choice)
-    if @player_1.turn
-      @board.cases_hash[@available_board_cases_hash.keys[user_choice.to_i]].cross
-    else
-       @board.cases_hash[@available_board_cases_hash.keys[user_choice.to_i]].ring
-    end
-    @available_board_cases_hash.delete(@available_board_cases_hash.keys[user_choice.to_i])
-    puts "-" * 50
-    @board.show_board
   end
 
   def change_turns
@@ -75,39 +72,38 @@ class Game
 
   def is_still_going?
     # Si le plateau n'est pas rempli et que personne n'a aligné un symbole 3 fois
-    if winner == nil && @available_board_cases_hash.size > 0
-      true
-    else
-      false
-    end
+    @board.winner == nil && @available_board_cases_hash.size > 0 ? true : false
   end
 
   def my_game_end
     puts "-" * 50
-    if winner == nil
+    if @available_board_cases_hash.size == 0
       puts 'Partie nulle'
-    elsif winner == 'X'.colorize(:blue)
+    elsif @board.winner == 'X'.colorize(:blue)
+      @player_1.score += 1
       puts "#{@player_1.name} a gagné !"
     else
       puts "#{@player_2.name} a gagné !"
+      @player_2.score += 1
     end
     puts "-" * 50
   end
 
-  def winner
-    # Définir les combinaisons gagnantes
-    [
-      [:a1,:a2,:a3],[:b1,:b2,:b3],[:c1,:c2,:c3],  # lignes
-      [:a1,:b1,:c1],[:a2,:b2,:c2],[:a3,:b3,:c3],  # colonnes
-      [:c1,:b2,:a3],[:a1,:b2,:c3]           # diagonal
-    ].each do |pattern| # pattern = combinaison gagnante
-      players = pattern.map{|i| @board.cases_hash[i].value }.uniq # uniq (pour supprimer les doublons)
-      next if players.size != 1 # si taille = 1, c'étaient des doublons, et c'est gagné !
-      winner = players.first
-      next if winner == ' '
-      return winner
+  def new_round
+    user_choice = "0"
+    while !user_choice.match(/^[YN]$/)
+      puts "Voulez-vous rejouer ? (Y/N)"
+      user_choice = gets.chomp
     end
-    nil
+    if user_choice == "Y"
+      @board = Board.new
+      @available_board_cases_hash = @board.cases_hash.clone
+      @round += 1
+      true
+    else
+      "Merci à bientôt !"
+      false
+    end
   end
 
 end
